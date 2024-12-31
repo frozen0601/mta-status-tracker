@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import List, Dict
 import requests
 
 # from subway.proto import gtfs_realtime_pb2
@@ -12,6 +12,11 @@ class StatusUpdateError(Exception):
 
 
 class SubwayStatusProvider(ABC):
+    @abstractmethod
+    def get_subway_line_names(self) -> List[str]:
+        """Returns a list of subway line names"""
+        pass
+
     @abstractmethod
     def get_latest_line_status(self) -> Dict[str, SubwayStatus]:
         """Returns a dictionary mapping subway line IDs to their SubwayStatus value"""
@@ -52,9 +57,57 @@ class SubwayStatusProvider(ABC):
 
 
 class APISubwayStatusProvider(SubwayStatusProvider):
-    def __init__(self):
-        self.url = "https://collector-otp-prod.camsys-apps.com/realtime/serviceStatus"
-        self.headers = {"User-Agent": "Python/3.x MTA-Client/1.0"}
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.url = "https://collector-otp-prod.camsys-apps.com/realtime/serviceStatus"
+            cls._instance.headers = {"User-Agent": "Python/3.x MTA-Client/1.0"}
+        return cls._instance
+
+    def get_subway_line_names(self) -> List[str]:
+        try:
+            response = requests.get(self.url, headers=self.headers)
+            response.raise_for_status()
+            data = response.json()
+
+            line_names = set()
+            for route in data.get("routeDetails", []):
+                if route.get("mode") == "subway" and route.get("route"):
+                    line_names.add(route.get("route"))
+
+            return list(line_names)
+
+        except Exception:
+            return [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "6X",
+                "7",
+                "7X",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "FX",
+                "G",
+                "J",
+                "L",
+                "M",
+                "N",
+                "Q",
+                "S",
+                "SIR",
+                "W",
+                "Z",
+            ]
 
     def get_latest_line_status(self) -> Dict[str, SubwayStatus]:
         try:
@@ -87,16 +140,4 @@ def get_subway_status_provider(provider_type: str = "api") -> SubwayStatusProvid
     return providers[provider_type]()
 
 
-_provider_instance = None
-
-
-def get_latest_line_status() -> Dict[str, SubwayStatus]:
-    """Get the latest subway status using a singleton provider instance."""
-    global _provider_instance
-    try:
-        if _provider_instance is None:
-            _provider_instance = get_subway_status_provider("api")
-        return _provider_instance.get_latest_line_status()
-    except Exception as e:
-        print(f"Error getting subway status: {e}")
-        return {}
+mta_client = APISubwayStatusProvider()

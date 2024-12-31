@@ -140,3 +140,14 @@ LOGGING = {
         },
     },
 }
+
+
+from celery.schedules import crontab
+from datetime import timedelta
+
+CELERY_BEAT_SCHEDULE = {
+    "update-subway-statuses": {
+        "task": "subway.tasks.update_subway_statuses",
+        "schedule": timedelta(seconds=10),
+    },
+}

@@ -4,11 +4,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import SubwayLine
 from .mta_data_fetcher import StatusUpdateError
+from subway.tasks import update_subway_statuses
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_status(request):
+    update_subway_statuses()
     line_name = request.GET.get("line")
     try:
         latest_line_info = SubwayLine.update_statuses(line_name)

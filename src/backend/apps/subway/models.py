@@ -34,34 +34,34 @@ class SubwayLine(models.Model):
         if old_instance.status != instance.status:
             if instance.status == SubwayStatus.DELAYED:
                 instance.delay_start_time = timezone.now()
-                print(f"Line {instance.name} is experiencing delays")
                 logger.info(f"Line {instance.name} is experiencing delays")
             elif instance.status == SubwayStatus.NORMAL:
                 if instance.delay_start_time:
                     instance.total_delay_duration += timezone.now() - instance.delay_start_time
                     instance.delay_start_time = None
-                print(f"Line {instance.name} is now recovered")
                 logger.info(f"Line {instance.name} is now recovered")
 
     @classmethod
     def update_statuses(cls, line_name=None):
         """Update statuses for all lines or a specific line."""
-        from .mta_data_fetcher import get_latest_line_status
+        from .mta_data_fetcher import mta_client
 
-        latest_lines = get_latest_line_status()
+        # Get latest statuses from MTA
+        latest_statuses = mta_client.get_latest_line_status()
         if line_name:
-            if line_name not in latest_lines:
+            if line_name not in latest_statuses:
                 return {}
-            latest_lines = {line_name: latest_lines[line_name]}
 
         with transaction.atomic():
+            lines = cls.objects.filter(name__in=latest_statuses.keys())
             updated_lines = {}
-            for name, status in latest_lines.items():
-                line, _ = cls.objects.get_or_create(name=name, defaults={"status": status or SubwayStatus.NORMAL})
-                if line.status != status:
-                    line.status = status or SubwayStatus.NORMAL
+
+            for line in lines:
+                new_status = latest_statuses[line.name]
+                if line.status != new_status:
+                    line.status = new_status
                     line.save()
-                updated_lines[name] = line
+                updated_lines[line.name] = line
 
             return updated_lines
 
