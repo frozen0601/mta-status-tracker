@@ -2,12 +2,6 @@
 import sys
 import os
 
-import progressbar
-
-
-progressbar.streams.wrap_stderr()
-
-
 if __name__ == "__main__":
     sys.path.append("src")
     settings_module = os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.base")

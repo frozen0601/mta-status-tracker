@@ -50,14 +50,16 @@ class SubwayLine(models.Model):
 
         latest_lines = get_latest_line_status()
         if line_name:
-            latest_lines = {line_name: latest_lines.get(line_name)}
+            if line_name not in latest_lines:
+                return {}
+            latest_lines = {line_name: latest_lines[line_name]}
 
         with transaction.atomic():
             updated_lines = {}
-            for name, new_status in latest_lines.items():
-                line, created = cls.objects.get_or_create(name=name, defaults={"status": new_status})
-                if not created and line.status != new_status:
-                    line.status = new_status
+            for name, status in latest_lines.items():
+                line, _ = cls.objects.get_or_create(name=name, defaults={"status": status or SubwayStatus.NORMAL})
+                if line.status != status:
+                    line.status = status or SubwayStatus.NORMAL
                     line.save()
                 updated_lines[name] = line
 
