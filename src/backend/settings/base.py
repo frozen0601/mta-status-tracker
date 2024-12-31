@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "rest_framework",
     # Local apps
     "subway",
+    "commands",
 ]
 
 MIDDLEWARE = [
@@ -127,8 +128,14 @@ LOGGING = {
             "class": "logging.StreamHandler",
         },
     },
-    "root": {
-        "handlers": ["console"],
-        "level": "INFO",
+    "loggers": {
+        "": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+        },
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+        },
     },
 }
