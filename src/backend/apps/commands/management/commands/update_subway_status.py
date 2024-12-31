@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from subway.models import SubwayLine
-from subway.mta_data_fetcher import StatusUpdateError
+from exceptions import StatusUpdateError
 import logging
 
 logger = logging.getLogger(__name__)

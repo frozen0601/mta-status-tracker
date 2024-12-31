@@ -5,10 +5,7 @@ import requests
 # from subway.proto import gtfs_realtime_pb2
 # from subway.proto import mercury_gtfs_realtime_pb2
 from subway.models import SubwayStatus
-
-
-class StatusUpdateError(Exception):
-    pass
+from exceptions import StatusUpdateError
 
 
 class SubwayStatusProvider(ABC):
