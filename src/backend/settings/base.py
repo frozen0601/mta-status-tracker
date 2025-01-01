@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     # Third party apps
     "channels",
     "rest_framework",
+    "drf_spectacular",
     # Local apps
     "subway",
     "commands",
@@ -103,6 +104,14 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 100,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "MTA Status Tracker API",
+    "DESCRIPTION": "Real-time NYC subway line status tracking",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 # Internationalization

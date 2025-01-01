@@ -1,17 +1,45 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
 from rest_framework import status
-from django.utils import timezone
 from .models import SubwayLine
 from exceptions import StatusUpdateError
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
+@extend_schema(
+    description="Get subway line statuses",
+    parameters=[
+        OpenApiParameter(name="line", description="Comma-separated line names", type=str),
+        OpenApiParameter(name="status", description="Filter by status (normal,delayed)", type=str),
+    ],
+    responses={200: list, 404: dict, 503: dict},
+    examples=[
+        OpenApiExample(
+            "Success Response",
+            value=[{"line": "1", "status": "normal"}, {"line": "2", "status": "delayed"}],
+            response_only=True,
+            status_codes=["200"],
+        ),
+        OpenApiExample(
+            "Not Found Error",
+            value={"error": "No matching subway lines found"},
+            response_only=True,
+            status_codes=["404"],
+        ),
+        OpenApiExample(
+            "Service Unavailable Error",
+            value={"error": "Failed to update statuses: Connection error"},
+            response_only=True,
+            status_codes=["503"],
+        ),
+    ],
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_status(request):
@@ -45,6 +73,31 @@ def get_status(request):
         return Response({"error": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@extend_schema(
+    description="Get subway line uptime metrics",
+    parameters=[OpenApiParameter(name="line", description="Comma-separated line names", type=str)],
+    responses={200: list, 404: dict, 503: dict},
+    examples=[
+        OpenApiExample(
+            "Success Response",
+            value=[{"line": "1", "uptime": 0.855}, {"line": "2", "uptime": 0.588}],
+            response_only=True,
+            status_codes=["200"],
+        ),
+        OpenApiExample(
+            "Not Found Error",
+            value={"error": "No matching subway lines found"},
+            response_only=True,
+            status_codes=["404"],
+        ),
+        OpenApiExample(
+            "Service Unavailable Error",
+            value={"error": "Failed to update statuses: Connection error"},
+            response_only=True,
+            status_codes=["503"],
+        ),
+    ],
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_uptime(request):
