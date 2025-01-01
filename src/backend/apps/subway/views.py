@@ -16,23 +16,24 @@ logger = logging.getLogger(__name__)
 @permission_classes([AllowAny])
 def get_status(request):
     """Fetch the status of subway lines with optional filters for line and status."""
-    line_name = request.GET.get("line")
-    status_filter = request.GET.get("status")
+    line_names = request.GET.get("line", "").split(",")
+    line_statuses = request.GET.get("status", "").split(",")
 
     try:
         latest_lines = SubwayLine.update_statuses()
 
         # Apply filters
         lines = SubwayLine.objects.filter(name__in=latest_lines.keys())
-        if line_name:
-            lines = lines.filter(name=line_name)
-        if status_filter:
-            lines = lines.filter(status=status_filter)
+        if line_names and line_names != [""]:
+            lines = lines.filter(name__in=[name.strip() for name in line_names])
+
+        if line_statuses and line_statuses != [""]:
+            lines = lines.filter(status__in=[status.strip() for status in line_statuses])
 
         if not lines.exists():
-            raise ValidationError("No matching subway lines found.")
+            logger.error(f"No matching subway lines found for line={line_names} and status={line_statuses}")
+            return Response({"error": "No matching subway lines found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Convert lines to dictionary format
         response_data = [line.to_dict() for line in lines]
         return Response(response_data, status=status.HTTP_200_OK)
 
@@ -48,7 +49,7 @@ def get_status(request):
 @permission_classes([AllowAny])
 def get_uptime(request):
     """Get uptime for all lines or filtered by line name."""
-    line_name = request.GET.get("line")
+    line_names = request.GET.get("line", "").split(",")
 
     try:
         # Update all statuses first
@@ -56,8 +57,8 @@ def get_uptime(request):
 
         # Get lines and apply filter
         lines = SubwayLine.objects.filter(name__in=latest_lines.keys())
-        if line_name:
-            lines = lines.filter(name=line_name)
+        if line_names and line_names != [""]:
+            lines = lines.filter(name__in=[name.strip() for name in line_names])
 
         if not lines.exists():
             return Response({"error": "No matching subway lines found"}, status=status.HTTP_404_NOT_FOUND)

@@ -121,25 +121,6 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Basic logging
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "handlers": {
-#         "console": {
-#             "class": "logging.StreamHandler",
-#         },
-#     },
-#     "loggers": {
-#         "": {
-#             "handlers": ["console"],
-#             "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-#         },
-#         "django": {
-#             "handlers": ["console"],
-#             "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-#         },
-#     },
-# }
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
