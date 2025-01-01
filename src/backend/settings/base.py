@@ -160,6 +160,10 @@ LOGGING = {
 }
 
 
+TEST_RUNNER = "django.test.runner.DiscoverRunner"
+
+TEST_DISCOVER_PATTERNS = ["test_*.py", "*_test.py", "tests/*.py"]
+
 from datetime import timedelta
 
 CELERY_BEAT_SCHEDULE = {
