@@ -1,6 +1,7 @@
 # MTA Status Tracker
 
-A back-end coding test project built with Django 5 and containerized using Docker.
+A back-end coding test project built with **Django** and containerized using **Docker**.
+
 This project offers APIs to track subway line statuses and uptime, leveraging real-time data from the MTA.
 
 -   **Tech Stack**:
