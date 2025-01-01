@@ -33,6 +33,15 @@ Project tracking is available on the [Kanban Board](https://github.com/users/fro
     make init
     ```
 
+    This is equivalent to:
+    ```bash
+    docker-compose down
+    docker-compose build --no-cache
+    docker-compose up -d
+    docker-compose exec django python manage.py migrate
+    docker-compose exec django python manage.py seed_subway_lines
+    ```
+
 3. **Run the Project**
    Start the project with Docker:
 

@@ -138,11 +138,20 @@ LOGGING = {
             "format": "[{asctime}] {levelname} {name}: {message}",
             "style": "{",
         },
+        "status_changes": {
+            "format": "[{asctime}][MTA status change]: {message}",
+            "style": "{",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
+        },
+        "status_file": {
+            "class": "logging.FileHandler",
+            "filename": "logs/status_changes.log",
+            "formatter": "status_changes",
         },
     },
     "loggers": {
@@ -154,6 +163,11 @@ LOGGING = {
         "celery": {
             "handlers": ["console"],
             "level": "WARNING",
+            "propagate": False,
+        },
+        "subway.status_changes": {
+            "handlers": ["console", "status_file"],
+            "level": "INFO",
             "propagate": False,
         },
     },

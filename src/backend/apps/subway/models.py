@@ -8,6 +8,7 @@ import datetime
 import logging
 
 logger = logging.getLogger(__name__)
+status_logger = logging.getLogger("subway.status_changes")
 
 
 class SubwayStatus(models.TextChoices):
@@ -35,12 +36,12 @@ class SubwayLine(models.Model):
         if old_instance.status != instance.status:
             if instance.status == SubwayStatus.DELAYED:
                 instance.delay_start_time = timezone.now()
-                logger.info(f"Line {instance.name} is experiencing delays")
+                status_logger.info(f"Line {instance.name} is experiencing delays")
             elif instance.status == SubwayStatus.NORMAL:
                 if instance.delay_start_time:
                     instance.total_delay_duration += timezone.now() - instance.delay_start_time
                     instance.delay_start_time = None
-                logger.info(f"Line {instance.name} is now recovered")
+                status_logger.info(f"Line {instance.name} is now recovered")
 
     @classmethod
     def update_statuses(cls, line_name=None) -> dict[str, "SubwayLine"]:
