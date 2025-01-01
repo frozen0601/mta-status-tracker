@@ -10,4 +10,3 @@ logger = get_task_logger(__name__)
 def update_subway_statuses():
     """Update all subway line statuses."""
     SubwayLine.update_statuses()
-    logger.warning("Subway statuses updated")
