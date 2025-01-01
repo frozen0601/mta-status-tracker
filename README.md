@@ -44,6 +44,7 @@ Project tracking is available on the [Kanban Board](https://github.com/users/fro
 ---
 
 ## API Endpoints
+API documentation is available via ReDoc at [http://localhost:8000/redoc/](http://localhost:8000/redoc/).
 
 ### 1. **Get Subway Line Status**
 
