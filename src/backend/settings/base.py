@@ -144,16 +144,6 @@ LOGGING = {
         },
         "celery": {
             "handlers": ["console"],
-            "level": "WARNING",  # Only show warnings and above
-            "propagate": False,
-        },
-        "celery.task": {
-            "handlers": ["console"],
-            "level": "WARNING",
-            "propagate": False,
-        },
-        "celery.beat": {
-            "handlers": ["console"],
             "level": "WARNING",
             "propagate": False,
         },
@@ -161,7 +151,6 @@ LOGGING = {
 }
 
 
-from celery.schedules import crontab
 from datetime import timedelta
 
 CELERY_BEAT_SCHEDULE = {
