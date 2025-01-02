@@ -25,9 +25,15 @@ Project tracking is available on the [Kanban Board](https://github.com/users/fro
     git clone https://github.com/your-repo-url/mta-status-tracker.git
     cd mta-status-tracker
     ```
+2. **Create `.env` at the root of the project with the following context**
+    ```bash
+    DJANGO_SETTINGS_MODULE=settings.base
+    DEBUG=False
+    ```
 
 2. **(on First Run) Initialize the Project**
-   Run the following command to build the Docker environment, install dependencies, and set up the database:
+   
+   Run the following command to build the Docker environment and run.
 
     ```bash
     make init
@@ -42,7 +48,7 @@ Project tracking is available on the [Kanban Board](https://github.com/users/fro
     docker-compose exec django python manage.py seed_subway_lines
     ```
 
-3. **Run**
+4. **Run**
     ```bash
     docker-compose up -d
     ```
@@ -112,23 +118,44 @@ MTA Line status are logged whenever their status changed (two states: `normal`/`
 
 ![image](https://github.com/user-attachments/assets/a1d16f47-1920-40eb-acb2-49590d78ec74)
 
-
 ---
 
-## Design Decisions
-  Throughout the development of this project, I placed the highest priority on readability, maintainability, and scalability.
+## Design Decisions  
+The design choices below were made after considering the requirements and user scenarios. I’ve balanced current needs with future flexibility, keeping in mind that users might have different needs that could require changes down the line.
 
-1. **Pagination**:
-   Pagination was not implemented because the dataset is small and results are naturally limited.
+1. **Data Model Design**:  
+   - **User story**: Users want real-time updates and accurate uptime stats.
+   - **Solution**: I’m using a dual-model approach with `SubwayLine` and `StatusHistory`.
+   - **Other options considered**:
+     * For a focus on real-time: Could use just cached current status.
+     * For heavy analytics: A time-series database could be a good fit.
 
-2. **Incremental Updates**:
-   Instead of batch updating all subway line data, individual updates are applied. This approach allows for the use of Django signals for logging, resulting in cleaner and easier-to-manage code.
-
-3. **Modular Data Fetching**:
-   The third-party data fetching logic is encapsulated in `mta_data_fetcher.py`, which defines an abstract base class (`SubwayStatusProvider`). This modular design supports future extensibility, such as merging or dynamically choosing the best data source.
-
-4. **Task Scheduling**:
-   Celery is used over cron jobs for periodic data fetching to enable better scalability, monitoring, and retry mechanisms.
+2. **Status Tracking Strategy**:
+   - **User story**: "I need the current status to be up-to-date."
+   - **Things I looked into**:
+     * What does "up-to-date" really mean for users? (This helped set the refresh rate.)
+     * What happens during API outages? (This led to gap detection.)
+     * How far back should I store history? (This influenced my compression strategy.)
+       
+3. **Performance**:
+   - **Current assumption**: I expect more reads than writes.
+   - **Designed for flexibility**:
+     * Handles higher write loads.
+     * Can store longer history (I might add an archival system later).
+       
+4. **Data Source Integration**:  
+   - **Current setup**: I’m using a single MTA API (tried a first one but failed🫠)
+   - **Future plans**:
+     * Manage multiple data sources.
+     * Support different transit systems.
+     * Manage both real-time/batch updates.
+       
+5. **Future Adaptability**:
+   - The system can grow to support:
+     * Different ways to calculate uptime.
+     * Additional performance metrics.
+     * New reporting features.
+     * Maybe more?
 
 ---
 
