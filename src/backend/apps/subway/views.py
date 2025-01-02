@@ -69,6 +69,7 @@ def get_status(request):
             logger.error(f"No matching subway lines found for line={line_names} and status={line_statuses}")
             return Response({"error": "No matching subway lines found"}, status=status.HTTP_404_NOT_FOUND)
 
+        lines = lines.order_by("name")
         response_data = [line.to_dict() for line in lines]
         return Response(response_data, status=status.HTTP_200_OK)
 
@@ -119,7 +120,8 @@ def get_uptime(request):
 
         if not lines.exists():
             return Response({"error": "No matching subway lines found"}, status=status.HTTP_404_NOT_FOUND)
-        sorted(lines, key=lambda line: line.name)
+
+        lines = lines.order_by("name")
         return Response(
             [
                 {
