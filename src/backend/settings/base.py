@@ -7,7 +7,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, "apps"))
 
 # Debug settings
-DEBUG = os.environ.get("DEBUG", False)
+DEBUG = os.environ.get("DEBUG", "False")
 SECRET_KEY = os.environ.get("SECRET_KEY", "your-default-secret-key-here")
 
 # Application definition
@@ -192,8 +192,7 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-
-if DEBUG:
+if DEBUG == "True":
     INSTALLED_APPS += ("debug_toolbar",)
     DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda request: True}
     MIDDLEWARE = [
