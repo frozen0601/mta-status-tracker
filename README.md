@@ -160,7 +160,10 @@ The design choices below were made after considering the requirements and user s
 ---
 
 ## To-Do
--   **Finish the `GTFSSubwayStatusProvider` as an alternative data source.**
+-   **Integrate Alternative Data Source:**
+    - Finish `GTFSSubwayStatusProvider` (https://api.mta.info/#/subwayRealTimeFeeds)
+    - For uptime percentage: https://metrics.mta.info/?subway/operationalmetrics
+    - Explore the package [nyct-gtfs](https://github.com/Andrew-Dickinson/nyct-gtfs)
 -   **Explore using Redis as the main spot for updates, processing, and serving data:**  
    - **Idea:** Redis can handle heavy traffic efficiently, acting as the primary data source for real-time updates while the database serves as a backup or journal for tracking delays and recovery.
    - **Benefits:**  
@@ -172,13 +175,17 @@ The design choices below were made after considering the requirements and user s
      - **Complexity and Historical Data:**  Redis alone isn’t ideal for long-term storage or complex analytics. Using Redis alongside the database increases complexity due to the need of fallback mechanisms, sync processes, additional conditions, and whatnot.
      - **Expandability:** While Redis may meet current needs, its volatile nature limits its ability to support future features like more analytics. Having db in-place is still crucial.
 
-
 --- 
 
 ## Notes & Learnings
 
 - **GTFS-Realtime Protocol Buffers**:  
   I was able to successfully extract data using [gtfs-realtime.proto](https://github.com/google/transit/blob/master/gtfs-realtime/proto/gtfs-realtime.proto) from the [data source](https://api.mta.info/#/subwayRealTimeFeeds).  
-  I can also integrate  the extention  ([source](https://github.com/OneBusAway/onebusaway-gtfs-realtime-api/blob/master/src/main/proto/com/google/transit/realtime/gtfs-realtime-service-status.proto)), but I still ran into issues accessing the extension data.
+  I can also integrate the extention  ([source](https://github.com/OneBusAway/onebusaway-gtfs-realtime-api/blob/master/src/main/proto/com/google/transit/realtime/gtfs-realtime-service-status.proto)), but I still ran into issues accessing the extension data.
 
   Reference: [MTA's GTFS Documentation](https://new.mta.info/document/90881).
+
+## Useful Links
+- https://new.mta.info/
+- https://new.mta.info/developers
+- https://groups.google.com/g/mtadeveloperresources/
