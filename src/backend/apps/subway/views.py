@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -48,15 +49,21 @@ def get_status(request):
     line_statuses = request.GET.get("status", "").split(",")
 
     try:
-        latest_lines = SubwayLine.update_statuses()
+        SubwayLine.update_statuses()
 
         # Apply filters
-        lines = SubwayLine.objects.filter(name__in=latest_lines.keys())
+        lines = SubwayLine.objects.all()
         if line_names and line_names != [""]:
-            lines = lines.filter(name__in=[name.strip() for name in line_names])
+            name_filter = Q()
+            for name in line_names:
+                name_filter |= Q(name__iexact=name.strip())
+            lines = lines.filter(name_filter)
 
         if line_statuses and line_statuses != [""]:
-            lines = lines.filter(status__in=[status.strip() for status in line_statuses])
+            status_filter = Q()
+            for line_status in line_statuses:
+                status_filter |= Q(status__iexact=line_status.strip())
+            lines = lines.filter(status_filter)
 
         if not lines.exists():
             logger.error(f"No matching subway lines found for line={line_names} and status={line_statuses}")
@@ -105,13 +112,10 @@ def get_uptime(request):
     line_names = request.GET.get("line", "").split(",")
 
     try:
-        # Update all statuses first
-        latest_lines = SubwayLine.update_statuses()
-
         # Get lines and apply filter
-        lines = SubwayLine.objects.filter(name__in=latest_lines.keys())
+        lines = SubwayLine.objects.all()
         if line_names and line_names != [""]:
-            lines = lines.filter(name__in=[name.strip() for name in line_names])
+            lines = lines.filter(name__iexact__in=[name.strip() for name in line_names])
 
         if not lines.exists():
             return Response({"error": "No matching subway lines found"}, status=status.HTTP_404_NOT_FOUND)
@@ -120,7 +124,7 @@ def get_uptime(request):
             [
                 {
                     "line": line.name,
-                    "uptime": line.get_uptime(),
+                    "uptime": round(line.uptime_ratio, 3) if line.uptime_ratio != -1.0 else None,
                 }
                 for line in lines
             ]

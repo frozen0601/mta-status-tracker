@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "channels",
     "rest_framework",
     "drf_spectacular",
+    "django_extensions",
     # Local apps
     "subway",
     "commands",
@@ -116,7 +117,7 @@ SPECTACULAR_SETTINGS = {
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "America/New_York"  # Changed to NY timezone since it's MTA
+TIME_ZONE = "America/New_York"
 USE_I18N = True
 USE_TZ = True
 
@@ -185,4 +186,17 @@ CELERY_BEAT_SCHEDULE = {
         "task": "subway.tasks.update_subway_statuses",
         "schedule": timedelta(seconds=10),
     },
+    "update-line-durations": {
+        "task": "subway.tasks.update_line_durations",
+        "schedule": timedelta(seconds=60),
+    },
 }
+
+
+if DEBUG:
+    INSTALLED_APPS += ("debug_toolbar",)
+    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda request: True}
+    MIDDLEWARE = [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+        "querycount.middleware.QueryCountMiddleware",
+    ] + MIDDLEWARE  # we want Debug Middleware at the top
