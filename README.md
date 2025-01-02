@@ -41,30 +41,16 @@ Project tracking is available on the [Kanban Board](https://github.com/users/fro
 
     `make init` is equivalent to:
     ```bash
-    docker-compose down
-    docker-compose build --no-cache
-    docker-compose up -d
-    docker-compose exec django python manage.py migrate
-    docker-compose exec django python manage.py seed_subway_lines
+	docker compose down
+	docker compose build --no-cache
+	docker compose up -d
+	docker compose exec django python manage.py migrate
+	docker compose exec django python manage.py seed_subway_lines
     ```
 
 4. **Run**
     ```bash
     docker-compose up -d
-    ```
-
-    or
-   
-    ```bash
-    make deploy
-    ```
-
-    `make deploy` is equivalent to:
-    ```bash
-    docker-compose down
-    docker-compose up -d
-    docker-compose exec django python manage.py migrate
-    docker-compose exec django python manage.py seed_subway_lines
     ```
 
 ---
