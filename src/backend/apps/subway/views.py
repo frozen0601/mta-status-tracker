@@ -3,9 +3,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import serializers
 from .models import SubwayLine
 from exceptions import StatusUpdateError
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, inline_serializer
 
 
 import logging
@@ -17,9 +18,17 @@ logger = logging.getLogger(__name__)
     description="Get subway line statuses",
     parameters=[
         OpenApiParameter(name="line", description="Comma-separated line names", type=str),
-        OpenApiParameter(name="status", description="Filter by status (normal,delayed)", type=str),
+        OpenApiParameter(name="status", description="Filter by status (normal, delayed)", type=str),
     ],
-    responses={200: list, 404: dict, 503: dict},
+    responses={
+        200: inline_serializer(
+            name="UptimeResponse",
+            fields={"line": serializers.CharField(), "status": serializers.CharField()},
+            many=False,
+        ),
+        404: dict,
+        503: dict,
+    },
     examples=[
         OpenApiExample(
             "Success Response",
@@ -84,11 +93,25 @@ def get_status(request):
 @extend_schema(
     description="Get subway line uptime metrics",
     parameters=[OpenApiParameter(name="line", description="Comma-separated line names", type=str)],
-    responses={200: list, 404: dict, 503: dict},
+    responses={
+        200: inline_serializer(
+            name="UptimeResponse",
+            fields={"line": serializers.CharField(), "uptime": serializers.FloatField(allow_null=True)},
+            many=False,
+        ),
+        404: dict,
+        503: dict,
+    },
     examples=[
         OpenApiExample(
             "Success Response",
-            value=[{"line": "1", "uptime": 0.855}, {"line": "2", "uptime": 0.588}],
+            value=[
+                {"line": "1", "uptime": 1.0},
+                {"line": "2", "uptime": 0.074},
+                {"line": "3", "uptime": 0.002},
+                {"line": "A", "uptime": 0.769},
+                {"line": "B", "uptime": 0.405},
+            ],
             response_only=True,
             status_codes=["200"],
         ),
