@@ -24,7 +24,8 @@ class StatusHistory(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=["line", "status", "start_time"]),
+            models.Index(fields=["line_id"]),
+            models.Index(fields=["line", "status"]),
         ]
 
     @classmethod
@@ -158,7 +159,7 @@ class SubwayLine(models.Model):
     ) -> Dict[Tuple[str, str], datetime.timedelta]:  # {(line name, line status): total_duration}
         """Get the total durations for each line and status combination."""
         lines_info = (
-            StatusHistory.objects.filter(line__in=lines, end_time__gte=models.F("line__created_at"))
+            StatusHistory.objects.filter(line__in=lines)
             .values("line", "status")
             .annotate(total_duration=models.Sum(models.F("end_time") - models.F("start_time")))
         )
