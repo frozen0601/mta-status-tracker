@@ -156,6 +156,10 @@ LOGGING = {
         },
     },
     "loggers": {
+        "": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
         "subway": {
             "handlers": ["console"],
             "level": "INFO",
@@ -184,7 +188,7 @@ from datetime import timedelta
 CELERY_BEAT_SCHEDULE = {
     "update-subway-statuses": {
         "task": "subway.tasks.update_subway_statuses",
-        "schedule": timedelta(seconds=10),
+        "schedule": timedelta(seconds=30),
     },
     "update-line-durations": {
         "task": "subway.tasks.update_line_durations",

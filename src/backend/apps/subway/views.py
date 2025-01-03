@@ -4,9 +4,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import serializers
-from .models import SubwayLine
 from exceptions import StatusUpdateError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, inline_serializer
+
+from .models import SubwayLine
+from .mta_data_fetcher import mta_client
 
 
 import logging
@@ -57,10 +59,35 @@ def get_status(request):
     line_names = request.GET.get("line", "").split(",")
     line_statuses = request.GET.get("status", "").split(",")
 
+    # Response with MTA data if available
     try:
-        SubwayLine.update_statuses()
+        latest_statuses = mta_client.get_latest_line_status()
 
-        # Apply filters
+        response_data = []
+        for line_name, subway_status in latest_statuses.items():
+            if (not line_names or line_names == [""] or line_name in line_names) and (
+                not line_statuses or line_statuses == [""] or subway_status.value in line_statuses
+            ):
+                response_data.append({"line": line_name, "status": subway_status.value})
+
+        if not response_data:
+            logger.error(
+                f"[mta source] No matching subway lines found for line={line_names} and status={line_statuses}"
+            )
+            return Response({"error": "No matching subway lines found"}, status=status.HTTP_404_NOT_FOUND)
+
+        response_data.sort(key=lambda x: x["line"])
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    # otherwise fallback to database
+    except Exception as e:
+        logging.error(f"Failed to fetch statuses from MTA: {e}")
+        return fallback_to_database(line_names, line_statuses)
+
+
+def fallback_to_database(line_names, line_statuses):
+    """Fallback method to fetch from database."""
+    try:
         lines = SubwayLine.objects.all()
         if line_names and line_names != [""]:
             name_filter = Q()
@@ -75,7 +102,9 @@ def get_status(request):
             lines = lines.filter(status_filter)
 
         if not lines.exists():
-            logger.error(f"No matching subway lines found for line={line_names} and status={line_statuses}")
+            logger.error(
+                f"[database source] No matching subway lines found for line={line_names} and status={line_statuses}"
+            )
             return Response({"error": "No matching subway lines found"}, status=status.HTTP_404_NOT_FOUND)
 
         lines = lines.order_by("name")

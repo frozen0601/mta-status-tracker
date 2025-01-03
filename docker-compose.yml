@@ -8,7 +8,8 @@ services:
         build:
             context: .
             dockerfile: docker/Dockerfile.backend
-        command: gunicorn asgi:application -k uvicorn.workers.UvicornWorker -b :8000 --reload
+        command: gunicorn wsgi:application -b :8000 --reload
+        # command: gunicorn asgi:application -k uvicorn.workers.UvicornWorker -b :8000 --reload
         env_file: .env
         volumes:
             - ./src/backend:/app
