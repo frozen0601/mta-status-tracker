@@ -50,7 +50,7 @@ Project tracking is available on the [Kanban Board](https://github.com/users/fro
 
 4. **Run**
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
 
 ---
